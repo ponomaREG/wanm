@@ -6,7 +6,7 @@ interface Interface {
 
 
     interface View{
-        fun addMark(latitude:Double,longitude:Double,title:String,snippet:String)
+        fun addMark(latitude:Double,longitude:Double,title:String,snippet:String,type:String)
     }
 
     interface Presenter{

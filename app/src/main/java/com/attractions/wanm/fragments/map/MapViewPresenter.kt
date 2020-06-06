@@ -19,11 +19,21 @@ class MapViewPresenter(val view:Interface.View) : Interface.Presenter {
            this.view.addMark(attraction.longitude,
                attraction.latitude,
                attraction.title,
-               attraction.snippet)
+               attraction.snippet,
+               getStringNaMeOfIconMapByTypeId(attraction.type))
        }
     }
 
     override fun callbackError(t: Throwable) {
         Log.e("ERROR",t.localizedMessage!!)
+    }
+
+
+    private fun getStringNaMeOfIconMapByTypeId(id:Int):String{
+        return when(id){
+            0 -> "map_icon_museum"
+            2 -> "map_icon_church"
+            else -> "map_icon_default"
+        }
     }
 }

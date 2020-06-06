@@ -147,6 +147,10 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
 
 
 
+
+
+
+
     private fun setMarksOnMap(){
         presenter.requestMarks()
     }
@@ -160,11 +164,12 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
         return Bitmap.createScaledBitmap(imageBitmap, width, height, false)
     }
 
-    override fun addMark(latitude: Double, longitude: Double, title: String, snippet: String) {
+    override fun addMark(latitude: Double, longitude: Double, title: String, snippet: String,type:String) {
         val latIng = LatLng(longitude, latitude)
+        Log.d("COORD","${longitude},${latIng}")
         mMap.addMarker(MarkerOptions()
             .position(latIng)
-            .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("unnamed",100,100)))
+            .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(type,100,100)))
             .title(title)
             .snippet(snippet))
     }
