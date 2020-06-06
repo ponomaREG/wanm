@@ -83,31 +83,35 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
 
         } else {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION)
-//            ActivityCompat.requestPermissions(
-//                activity as MainActivity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-//                PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION
-//            )
         }
     }
 
 
-    private fun getDeviceLocation() { /*
-     * Get the best and most recent location of the device, which may be null in rare
-     * cases when a location is not available.
-     */
+    private fun getDeviceLocationAndMoveOn() {
+        val latLngCurrent = getDeviceLocationLatLng()
+        if(latLngCurrent != null) moveOnLatLng(latLngCurrent)
+
+    }
+
+    private fun getDeviceLocationLatLng():LatLng?{
+        var latLng:LatLng? = null
         try {
             val mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context!!)
             if (mLocationPermissionGranted) {
-               mFusedLocationProviderClient.getLastLocation().addOnSuccessListener {
-                   val latLng = LatLng(it.latitude,it.longitude)
-                   mMap.moveCamera(
-                       CameraUpdateFactory.newLatLngZoom(latLng,13F)
-                   )
-               }
+                mFusedLocationProviderClient.getLastLocation().addOnSuccessListener {
+                    latLng = LatLng(it.latitude,it.longitude)
+                }
             }
         } catch (e: SecurityException) {
             Log.e("Exception: %s", e.message)
         }
+        return latLng
+    }
+
+    private fun moveOnLatLng(latLng: LatLng){
+        mMap.moveCamera(
+            CameraUpdateFactory.newLatLngZoom(latLng,11F)
+        )
     }
 
     private fun updateLocation(){
@@ -115,7 +119,7 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
             if (mLocationPermissionGranted) {
                 mMap.isMyLocationEnabled = true
                 mMap.uiSettings.isMyLocationButtonEnabled = true
-                getDeviceLocation()
+                getDeviceLocationAndMoveOn()
             } else {
                 mMap.isMyLocationEnabled = false
                 mMap.uiSettings.isMyLocationButtonEnabled = false
@@ -165,13 +169,13 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
     }
 
     override fun addMark(latitude: Double, longitude: Double, title: String, snippet: String,type:String) {
-        val latIng = LatLng(longitude, latitude)
-        Log.d("COORD","${longitude},${latIng}")
+        val latIng = LatLng(latitude, longitude)
         mMap.addMarker(MarkerOptions()
             .position(latIng)
             .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(type,100,100)))
             .title(title)
             .snippet(snippet))
+
     }
 
 
