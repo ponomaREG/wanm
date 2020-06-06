@@ -1,37 +1,42 @@
-package com.attractions.wanm.fragments
+package com.attractions.wanm.fragments.map
 
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.attractions.wanm.R
-import com.attractions.wanm.main.MainActivity
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 
 
-class MapView : Fragment(), OnMapReadyCallback {
+class MapView : Fragment(), OnMapReadyCallback, Interface.View {
 
     private var mLocationPermissionGranted:Boolean = false
     private val PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1
 
-    companion object{
-        private var instance:MapView? = null
+    private val presenter:Interface.Presenter = MapViewPresenter(this)
 
-        fun getInstance():MapView{
+    companion object{
+        private var instance: MapView? = null
+
+        fun getInstance(): MapView {
             if(instance == null){
-                instance = MapView()
+                instance =
+                    MapView()
             }
             return instance as MapView
         }
@@ -60,28 +65,23 @@ class MapView : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        Log.d("LOG","ONMAPREADY")
         updateLocation()
+
     }
 
 
-    private fun getLocationPermission() { /*
-     * Request location permission, so that we can get the location of the
-     * device. The result of the permission request is handled by a callback,
-     * onRequestPermissionsResult.
-     */
+    private fun getLocationPermission() {
         if (ContextCompat.checkSelfPermission(
                 context!!,
                 Manifest.permission.ACCESS_FINE_LOCATION
             )
             == PackageManager.PERMISSION_GRANTED
         ) {
-            Log.d("ASADASD","ASDASDAS")
             mLocationPermissionGranted = true
             updateLocation()
+            setMarksOnMap()
 
         } else {
-            Log.d("ASDASDAS","!@#!@#!@")
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION)
 //            ActivityCompat.requestPermissions(
 //                activity as MainActivity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -98,10 +98,8 @@ class MapView : Fragment(), OnMapReadyCallback {
         try {
             val mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context!!)
             if (mLocationPermissionGranted) {
-                Log.d("LOG","mLocationPermissionGranted get")
                mFusedLocationProviderClient.getLastLocation().addOnSuccessListener {
                    val latLng = LatLng(it.latitude,it.longitude)
-                   Log.d("LOG","mLocationPermissionGranted move")
                    mMap.moveCamera(
                        CameraUpdateFactory.newLatLngZoom(latLng,13F)
                    )
@@ -115,12 +113,10 @@ class MapView : Fragment(), OnMapReadyCallback {
     private fun updateLocation(){
         try {
             if (mLocationPermissionGranted) {
-                Log.d("LOG","mLocationPermissionGranted")
                 mMap.isMyLocationEnabled = true
                 mMap.uiSettings.isMyLocationButtonEnabled = true
                 getDeviceLocation()
             } else {
-                Log.d("LOG ","NONE")
                 mMap.isMyLocationEnabled = false
                 mMap.uiSettings.isMyLocationButtonEnabled = false
                 getLocationPermission()
@@ -136,10 +132,8 @@ class MapView : Fragment(), OnMapReadyCallback {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        Log.d("REQUEST CODE", requestCode.toString())
         when (requestCode) {
             PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION -> {
-                // If request is cancelled, the result arrays are empty.
                 if (grantResults.size > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED
                 ) {
@@ -150,4 +144,30 @@ class MapView : Fragment(), OnMapReadyCallback {
         }
 
     }
+
+
+
+    private fun setMarksOnMap(){
+        presenter.requestMarks()
+    }
+
+
+    private fun resizeMapIcons(iconName: String?, width: Int, height: Int): Bitmap? {
+        val imageBitmap = BitmapFactory.decodeResource(
+            resources,
+            resources.getIdentifier(iconName, "drawable", activity!!.packageName)
+        )
+        return Bitmap.createScaledBitmap(imageBitmap, width, height, false)
+    }
+
+    override fun addMark(latitude: Double, longitude: Double, title: String, snippet: String) {
+        val latIng = LatLng(longitude, latitude)
+        mMap.addMarker(MarkerOptions()
+            .position(latIng)
+            .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons("unnamed",100,100)))
+            .title(title)
+            .snippet(snippet))
+    }
+
+
 }
