@@ -77,7 +77,11 @@ class BsvDescView:BottomSheetDialogFragment(),Interface.View {
     }
 
     override fun setImageError() {
-        //TODO:IMAGE ERROR
+        val view = view
+        if(view!= null){
+            val imageView = view.findViewById<ImageView>(R.id.fragment_desc_image)
+            imageView.setImageResource(R.drawable.map_desc_placeholder)
+        }
     }
 
     override fun setTitleError() {
