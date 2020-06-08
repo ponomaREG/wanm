@@ -1,13 +1,17 @@
 package com.attractions.wanm.fragments.descAttraction
 
 import android.graphics.Bitmap
+import android.media.Image
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import com.attractions.wanm.R
+import com.attractions.wanm.model_helper.Network
+import com.attractions.wanm.model_helper.PhotoDownloadManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 class BsvDescView:BottomSheetDialogFragment(),Interface.View {
@@ -61,8 +65,15 @@ class BsvDescView:BottomSheetDialogFragment(),Interface.View {
         }
     }
 
-    override fun setImage(bitmap: Bitmap) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun setImage(id:Int) {
+        val view = view
+        if(view!= null){
+            val imageView = view.findViewById<ImageView>(R.id.fragment_desc_image)
+            PhotoDownloadManager.loadImageByPicasso(
+                Network.transformIdOfAttractionToUrlOfPhotoAttraction(id),
+                imageView
+            )
+        }
     }
 
     override fun setImageError() {

@@ -11,10 +11,10 @@ import retrofit2.http.Query
 class Network {
 
     private var retrofit:Retrofit? = null
-    private val baseURL = "http://161.35.108.15:1111"
 
     companion object{
         private var instance:Network? = null
+        private val baseURL = "http://161.35.108.15:1111"
 
         fun getInstance():Network{
             if(instance == null){
@@ -22,6 +22,13 @@ class Network {
             }
             return instance as Network
         }
+
+
+        fun transformIdOfAttractionToUrlOfPhotoAttraction(id:Int):String{
+            return String.format("$baseURL/static/images/%d.jpg",id)
+        }
+
+
     }
 
 

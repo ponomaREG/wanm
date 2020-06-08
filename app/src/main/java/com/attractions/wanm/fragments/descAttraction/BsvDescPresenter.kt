@@ -18,7 +18,7 @@ class BsvDescPresenter(private val view:Interface.View):Interface.Presenter {
     override fun callBackSuccess(attraction: Attraction) {
         this.view.setTitle(attraction.title)
         this.view.setDesc(attraction.desc)
-        //TODO:IMAGE
+        this.view.setImage(attraction.id)
     }
 
     override fun callBackError(t: Throwable) {

@@ -10,7 +10,7 @@ interface Interface {
     interface View{
         fun setTitle(title:String)
         fun setDesc(desc:String)
-        fun setImage(bitmap: Bitmap)
+        fun setImage(id:Int)
         fun setImageError()
         fun setTitleError()
         fun setDescError()
