@@ -22,7 +22,8 @@ class MapViewPresenter(val view:Interface.View) : Interface.Presenter {
                attraction.longitude,
                attraction.title,
                attraction.snippet,
-               getStringNaMeOfIconMapByTypeId(attraction.type))
+               getStringNaMeOfIconMapByTypeId(attraction.type),
+               attraction.id)
 
        }
     }

@@ -6,6 +6,7 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Query
 
 class Network {
 
@@ -41,6 +42,9 @@ class Network {
     interface ReposAttractions{
         @GET("/attractions")
         fun getResponseAttraction():Observable<ResponseAttraction>
+
+        @GET("/attractions")
+        fun getResponseAttraction(@Query("id") id:Int):Observable<ResponseAttraction>
     }
 
 

@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.attractions.wanm.R
+import com.attractions.wanm.fragments.descAttraction.BsvDescView
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -152,6 +153,14 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
 
 
 
+    private fun initOclToInfoWindow(){
+        mMap.setOnInfoWindowClickListener {
+            val id:Int = it.tag as Int
+            Log.d("id",id.toString())
+            BsvDescView.getInstance(id).show(fragmentManager!!,"Description of mark")
+        }
+    }
+
 
 
 
@@ -168,14 +177,21 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
         return Bitmap.createScaledBitmap(imageBitmap, width, height, false)
     }
 
-    override fun addMark(latitude: Double, longitude: Double, title: String, snippet: String,type:String) {
+    override fun addMark(latitude: Double,
+                         longitude: Double,
+                         title: String,
+                         snippet: String,
+                         type:String,
+                         id:Int) {
         val latIng = LatLng(latitude, longitude)
-        mMap.addMarker(MarkerOptions()
+        val markerOptions = MarkerOptions()
             .position(latIng)
             .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(type,100,100)))
             .title(title)
-            .snippet(snippet))
+            .snippet(snippet)
+        mMap.addMarker(markerOptions).tag = id
 
+        initOclToInfoWindow()
     }
 
 
