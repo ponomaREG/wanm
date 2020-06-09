@@ -52,6 +52,12 @@ class Network {
 
         @GET("/attractions")
         fun getResponseAttraction(@Query("id") id:Int):Observable<ResponseAttraction>
+
+        @GET("/nearby/attractions")
+        fun getResponseAttractionNearByUser(
+            @Query("latitude") latitude:Double,
+            @Query("longitude") longitude:Double)
+                :Observable<ResponseAttraction>
     }
 
 

@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import com.attractions.wanm.R
+import com.attractions.wanm.fragments.list.ListAttView
 import com.attractions.wanm.fragments.map.MapView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -30,7 +31,8 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 R.id.bnv_listAttraction ->{
-                    //INSERT FRAGMENT LIST
+                    val fragment = ListAttView.getInstance()
+                    insertFragment(fragment)
                     true
                 }
                 else -> false
