@@ -14,7 +14,7 @@ class Network {
 
     companion object{
         private var instance:Network? = null
-        private val baseURL = "http://161.35.108.15:1111"
+        private const val baseURL = "http://161.35.108.15:1111"
 
         fun getInstance():Network{
             if(instance == null){

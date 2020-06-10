@@ -1,31 +1,40 @@
 package com.attractions.wanm.fragments.list
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.fragment.app.FragmentManager
 import androidx.recyclerview.widget.RecyclerView
 import com.attractions.wanm.R
+import com.attractions.wanm.fragments.descAttraction.BsvDescView
+import com.attractions.wanm.main.CommunicationBetweenListAndMap
+import com.attractions.wanm.main.MainActivity
 import com.attractions.wanm.model_helper.Network
 import com.attractions.wanm.model_helper.PhotoDownloadManager
 import com.attractions.wanm.model_helper.pojo.Attraction
 import com.attractions.wanm.presenter_helper.PresenterHelper
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.synthetic.main.rv_item.view.*
-import java.util.zip.Inflater
 
-class RecyclerViewAdapterListOfAttraction(context: Context,private var attractions:List<Attraction>)
+class RecyclerViewAdapterListOfAttraction(
+    context: Context,
+    private var attractions:List<Attraction>,
+    private var userLatLng: LatLng?
+)
     :RecyclerView.Adapter<RecyclerViewAdapterListOfAttraction.ViewHolder>() {
-    val latitude = 59.946290
-    val longitude = 30.265529
 
+    private var fragmentManager: FragmentManager
+    private var view:CommunicationBetweenListAndMap? = null
     private var inflater:LayoutInflater? = null
 
 
     init {
         this.inflater = LayoutInflater.from(context)
+        this.fragmentManager = (context as MainActivity).supportFragmentManager
+        this.view = context
     }
 
 
@@ -43,7 +52,6 @@ class RecyclerViewAdapterListOfAttraction(context: Context,private var attractio
 
         val currentAttraction:Attraction? = getAttractionAt(position)
 
-        //IMAGE LOADER
         PhotoDownloadManager.loadImageByPicasso(
             Network.transformIdOfAttractionToUrlOfPhotoAttraction(currentAttraction!!.id),
             holder.imageAttraction
@@ -51,17 +59,28 @@ class RecyclerViewAdapterListOfAttraction(context: Context,private var attractio
 
 
         holder.titleAttraction.text = currentAttraction.title
-        holder.rangeAttraction.text = String.format(
-            holder.rangeAttraction.text.toString(),
-            PresenterHelper.calculateDistanceInKilometersDouble(
-                currentAttraction.latitude,
-                latitude,
-                currentAttraction.longitude,
-                longitude
-            ))
+
+        if(userLatLng != null) {
+            holder.rangeAttraction.text = String.format(
+                holder.rangeAttraction.text.toString(),
+                PresenterHelper.calculateDistanceInKilometersDouble(
+                    currentAttraction.latitude,
+                    userLatLng!!.latitude,
+                    currentAttraction.longitude,
+                    userLatLng!!.longitude
+                )
+            )
+
+            holder.findOnMap.setOnClickListener {
+                this.view!!.showOnMapLatLng(currentAttraction.latitude,currentAttraction.longitude)
+            }
+        }else{
+            holder.findOnMap.visibility = View.GONE
+            holder.rangeAttraction.visibility = View.GONE
+        }
 
         holder.itemView.setOnClickListener {
-            //TODO: START DESC INFO
+            BsvDescView.getInstance(currentAttraction.id).show(fragmentManager,"Description of attraction")
         }
 
     }
@@ -70,6 +89,7 @@ class RecyclerViewAdapterListOfAttraction(context: Context,private var attractio
         val imageAttraction:ImageView = itemView.rv_item_image
         val titleAttraction:TextView = itemView.rv_item_title
         val rangeAttraction:TextView = itemView.rv_item_range
+        val findOnMap:ImageView = itemView.rv_item_findOnMap
     }
 
 

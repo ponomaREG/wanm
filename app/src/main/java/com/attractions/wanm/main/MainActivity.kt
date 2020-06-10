@@ -6,9 +6,10 @@ import androidx.fragment.app.Fragment
 import com.attractions.wanm.R
 import com.attractions.wanm.fragments.list.ListAttView
 import com.attractions.wanm.fragments.map.MapView
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(),CommunicationBetweenListAndMap {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,4 +48,14 @@ class MainActivity : AppCompatActivity() {
             .replace(R.id.main_frame,fragment)
             .commitNow()
     }
+
+    override fun showOnMapLatLng(latitude:Double,longitude:Double) {
+        insertFragment(MapView.getInstance(latitude,longitude))
+    }
+
+
+}
+
+interface CommunicationBetweenListAndMap{
+    fun showOnMapLatLng(latitude:Double,longitude:Double)
 }

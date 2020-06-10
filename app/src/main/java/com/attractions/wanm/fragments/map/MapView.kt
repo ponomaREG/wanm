@@ -21,6 +21,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 
 
@@ -28,17 +29,28 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
 
     private var mLocationPermissionGranted:Boolean = false
     private val PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1
+//    private val markers:List<Marker> = ArrayList<Marker>()
 
     private val presenter:Interface.Presenter = MapViewPresenter(this)
 
     companion object{
         private var instance: MapView? = null
+        private var customLatLng:LatLng? = null
 
         fun getInstance(): MapView {
             if(instance == null){
                 instance =
                     MapView()
             }
+            return instance as MapView
+        }
+
+        fun getInstance(latitude: Double,longitude: Double):MapView{
+            if(instance == null){
+                instance =
+                    MapView()
+            }
+            customLatLng = LatLng(latitude,longitude)
             return instance as MapView
         }
     }
@@ -66,6 +78,8 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+
+        setMarksOnMap()
         updateLocation()
 
     }
@@ -120,7 +134,8 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
             if (mLocationPermissionGranted) {
                 mMap.isMyLocationEnabled = true
                 mMap.uiSettings.isMyLocationButtonEnabled = true
-                getDeviceLocationAndMoveOn()
+                if(customLatLng != null) moveOnLatLng(customLatLng!!)
+                else getDeviceLocationAndMoveOn()
             } else {
                 mMap.isMyLocationEnabled = false
                 mMap.uiSettings.isMyLocationButtonEnabled = false
@@ -144,6 +159,9 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
                 ) {
                     mLocationPermissionGranted = true
                     updateLocation()
+                }else {
+                    setMarksOnMap()
+                    moveOnLatLng(LatLng(59.946290,30.265529))
                 }
             }
         }
@@ -189,8 +207,13 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
             .icon(BitmapDescriptorFactory.fromBitmap(resizeMapIcons(type,100,100)))
             .title(title)
             .snippet(snippet)
-        mMap.addMarker(markerOptions).tag = id
-
+        val newMarker = mMap.addMarker(markerOptions)
+        if(customLatLng != null) {
+            if (customLatLng!!.latitude == latitude
+                && customLatLng!!.longitude == longitude
+            ) newMarker.showInfoWindow()
+        }
+        newMarker.tag = id
         initOclToInfoWindow()
     }
 
