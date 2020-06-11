@@ -2,6 +2,7 @@ package com.attractions.wanm.fragments.map
 
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -10,10 +11,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.attractions.wanm.R
 import com.attractions.wanm.fragments.descAttraction.BsvDescView
+import com.attractions.wanm.services.LocationService
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -29,6 +32,10 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
 
     private var mLocationPermissionGranted:Boolean = false
     private val PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1
+    private val PERMISSIONS_REQUEST_BACKGROUND_LOCATION = 2
+    private val REQUIRED_PERMISSIONS = arrayOf(
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION)
 //    private val markers:List<Marker> = ArrayList<Marker>()
 
     private val presenter:Interface.Presenter = MapViewPresenter(this)
@@ -78,12 +85,15 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
         setMarksOnMap()
         updateLocation()
-
+        val intent = Intent(context,LocationService::class.java)
+        context!!.startService(intent)
     }
 
+    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(context!!, it) == PackageManager.PERMISSION_GRANTED
+    }
 
     private fun getLocationPermission() {
         if (ContextCompat.checkSelfPermission(
@@ -97,7 +107,7 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
             setMarksOnMap()
 
         } else {
-            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION)
+            requestPermissions(REQUIRED_PERMISSIONS,PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION)
         }
     }
 
@@ -164,6 +174,7 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
                     moveOnLatLng(LatLng(59.946290,30.265529))
                 }
             }
+
         }
 
     }
@@ -178,6 +189,7 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
             BsvDescView.getInstance(id).show(fragmentManager!!,"Description of mark")
         }
     }
+
 
 
 
