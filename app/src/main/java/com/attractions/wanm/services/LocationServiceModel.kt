@@ -9,13 +9,6 @@ import io.reactivex.schedulers.Schedulers
 class LocationServiceModel(private val presenter:Interface.Presenter):Interface.Model {
 
 
-
-    interface callbackFromModel{ //TODO:FIX POJO
-        fun callbackSuccess(attraction: BackgroundNearbyAttraction.NearbyAttraction)
-        fun callbackError(t:Throwable)
-        fun callbackErrorBackend(status:Int)
-    }
-
     override fun getNearAttraction(latitude:Double,longitude:Double) {
         Network.getInstance().getReposAttractions().getResponseAttractionNearByUserBackground(latitude, longitude)
             .observeOn(AndroidSchedulers.mainThread())

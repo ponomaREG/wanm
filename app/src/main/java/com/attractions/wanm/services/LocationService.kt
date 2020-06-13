@@ -12,6 +12,7 @@ import android.os.*
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.attractions.wanm.R
 import com.attractions.wanm.main.MainActivity
 import com.attractions.wanm.model_helper.pojo.Attraction
@@ -24,7 +25,7 @@ import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 
 
-class LocationService:Service(), LocationListener,Interface.Presenter,LocationServiceModel.callbackFromModel {
+class LocationService:Service(), LocationListener,Interface.Presenter {
 
     private val ACTION_STOP_SERVICE = "stopThis"
     private val TAG = "BackgroundLocation"
@@ -147,6 +148,7 @@ class LocationService:Service(), LocationListener,Interface.Presenter,LocationSe
         }else{
             //TODO:REQUEST
             Log.e("COORD","${latitude},${longitude}")
+            model.getNearAttraction(latitude.toDouble(),longitude.toDouble())
         }
     }
 
@@ -222,26 +224,23 @@ class LocationService:Service(), LocationListener,Interface.Presenter,LocationSe
         super.onDestroy()
     }
 
-    override fun callBackShowNotifyWithNearAttraction(attraction: Attraction) {
-
-    }
 
     override fun callbackSuccess(attraction: BackgroundNearbyAttraction.NearbyAttraction) {
         val notification:Notification = NotificationCompat.Builder(applicationContext,CHANNEL_ID)
             .setContentTitle(attraction.title)
             .setContentText("Расстояние до ближайшего: ${attraction.distance}")
-            .setBadgeIconType(R.drawable.map_icon_museum)
+            .setSmallIcon(R.drawable.map_icon_museum)
             .build()
 
-
+        NotificationManagerCompat.from(context!!).notify(1,notification)
     }
 
     override fun callbackError(t: Throwable) {
-
+            Log.e("CallbackNearby",t.localizedMessage!!)
     }
 
     override fun callbackErrorBackend(status: Int) {
-
+        Log.e("CallbackNearbyBackend","Status code: $status")
     }
 
 
