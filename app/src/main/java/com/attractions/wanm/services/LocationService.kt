@@ -14,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import com.attractions.wanm.R
 import com.attractions.wanm.main.MainActivity
+import com.attractions.wanm.model_helper.pojo.Attraction
+import com.attractions.wanm.model_helper.pojo.BackgroundNearbyAttraction
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.api.ApiException
@@ -22,16 +24,21 @@ import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 
 
-class LocationService:Service(), LocationListener {
+class LocationService:Service(), LocationListener,Interface.Presenter,LocationServiceModel.callbackFromModel {
 
     private val ACTION_STOP_SERVICE = "stopThis"
     private val TAG = "BackgroundLocation"
     private val TAG_LOCATION = "TAG_LOCATION"
+    private val CHANNEL_ID = "channel_location"
+    private val CHANNEL_NAME = "channel_location"
+
     private var context: Context? = null
 
     private var mFusedLocationClient: FusedLocationProviderClient? = null
     private var mLocationCallback: LocationCallback? = null
     private var mLocationRequest: LocationRequest? = null
+
+    private val model:Interface.Model = LocationServiceModel(this)
 
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -46,7 +53,7 @@ class LocationService:Service(), LocationListener {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         //Проверяем получили действие с отменой данного сервиса
-        if(ACTION_STOP_SERVICE.equals(intent!!.action)){
+        if(ACTION_STOP_SERVICE == intent!!.action){
             val notificationManager =
                 applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancel(101)
@@ -71,8 +78,6 @@ class LocationService:Service(), LocationListener {
             intent,
             PendingIntent.FLAG_ONE_SHOT
         )
-        val CHANNEL_ID = "channel_location"
-        val CHANNEL_NAME = "channel_location"
         var builder: NotificationCompat.Builder? = null
 
         //Интент для остановки
@@ -138,7 +143,7 @@ class LocationService:Service(), LocationListener {
                 ignoreCase = true
             )
         ) {
-            requestLocationUpdate()
+            requestLocationUpdate()//Выполняем еще запрос, так как на прошлый гугл выдал нулл
         }else{
             //TODO:REQUEST
             Log.e("COORD","${latitude},${longitude}")
@@ -147,24 +152,26 @@ class LocationService:Service(), LocationListener {
 
 
     private fun buildGoogleApiClient() {
+        //Получаем провайдер
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context!!)
+        //Настройки
         val mSettingsClient = LocationServices.getSettingsClient(context!!)
+        //Апи клиент гугла
         val mGoogleApiClient = GoogleApiClient.Builder(context!!)
-            .addConnectionCallbacks(object:GoogleApiClient.ConnectionCallbacks{
+            .addConnectionCallbacks(object:GoogleApiClient.ConnectionCallbacks{ //Слушатель успешного соединения
                 @SuppressLint("RestrictedApi")
                 override fun onConnected(p0: Bundle?) {
-                    mLocationRequest = LocationRequest()
+                    mLocationRequest = LocationRequest() //Запрос на получение локации
                     mLocationRequest!!.interval = 10 * 1000.toLong()
                     mLocationRequest!!.fastestInterval = 5 * 1000.toLong()
                     mLocationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
                     val builder = LocationSettingsRequest.Builder()
-                    builder.addLocationRequest(mLocationRequest!!)
+                    builder.addLocationRequest(mLocationRequest!!)//Настройки
                     builder.setAlwaysShow(true)
                     val mLocationSettingsRequest = builder.build()
                     mSettingsClient!!.checkLocationSettings(mLocationSettingsRequest)
                         .addOnSuccessListener {
-                            Log.e(TAG_LOCATION, "GPS Success")
-                            requestLocationUpdate()
+                            requestLocationUpdate()//Успешное подключение для выполнение запросов
                         }.addOnFailureListener { e ->
                             when ((e as ApiException).statusCode) {
                                 LocationSettingsStatusCodes.RESOLUTION_REQUIRED -> try {
@@ -189,16 +196,11 @@ class LocationService:Service(), LocationListener {
                 }
 
             })
-            .addOnConnectionFailedListener(object:GoogleApiClient.OnConnectionFailedListener{
-                override fun onConnectionFailed(p0: ConnectionResult) {
-                    buildGoogleApiClient()
-                }
-
-            })
+            .addOnConnectionFailedListener { buildGoogleApiClient() }//Выполняем снова
             .addApi(LocationServices.API)
             .build()
         val googleAPI = GoogleApiAvailability.getInstance()
-        val resultCode = googleAPI.isGooglePlayServicesAvailable(context)
+        val resultCode = googleAPI.isGooglePlayServicesAvailable(context)//Есть ли подключение к АПИ гугла
         if (resultCode == ConnectionResult.SUCCESS) {
             mGoogleApiClient!!.connect()
         }
@@ -206,7 +208,7 @@ class LocationService:Service(), LocationListener {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
                 Log.e(TAG_LOCATION, "Location Received")
-                onLocationChanged(locationResult.lastLocation)
+                onLocationChanged(locationResult.lastLocation)//Выводим полученную локацию , если мы ее получили
             }
         }
     }
@@ -219,5 +221,28 @@ class LocationService:Service(), LocationListener {
         }
         super.onDestroy()
     }
+
+    override fun callBackShowNotifyWithNearAttraction(attraction: Attraction) {
+
+    }
+
+    override fun callbackSuccess(attraction: BackgroundNearbyAttraction.NearbyAttraction) {
+        val notification:Notification = NotificationCompat.Builder(applicationContext,CHANNEL_ID)
+            .setContentTitle(attraction.title)
+            .setContentText("Расстояние до ближайшего: ${attraction.distance}")
+            .setBadgeIconType(R.drawable.map_icon_museum)
+            .build()
+
+
+    }
+
+    override fun callbackError(t: Throwable) {
+
+    }
+
+    override fun callbackErrorBackend(status: Int) {
+
+    }
+
 
 }

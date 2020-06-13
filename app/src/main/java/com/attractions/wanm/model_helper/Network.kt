@@ -1,5 +1,6 @@
 package com.attractions.wanm.model_helper
 
+import com.attractions.wanm.model_helper.pojo.BackgroundNearbyAttraction
 import com.attractions.wanm.model_helper.pojo.ResponseAttraction
 import io.reactivex.Observable
 import retrofit2.Retrofit
@@ -58,6 +59,13 @@ class Network {
             @Query("latitude") latitude:Double,
             @Query("longitude") longitude:Double)
                 :Observable<ResponseAttraction>
+
+        @GET("/background/nearby/attractions")
+        fun getResponseAttractionNearByUserBackground(
+            @Query("latitude") latitude: Double,
+            @Query("longitude") longitude: Double
+        ):Observable<BackgroundNearbyAttraction.ResponseNearbyAttraction>
+
     }
 
 
