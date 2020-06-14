@@ -12,6 +12,6 @@ class BackgroundNearbyAttraction {
 
     data class ResponseNearbyAttraction(
         val status:Int,
-        val nearAttraction: Attraction
+        val nearAttraction: NearbyAttraction
     )
 }

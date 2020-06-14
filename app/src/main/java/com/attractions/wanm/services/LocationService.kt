@@ -53,6 +53,7 @@ class LocationService:Service(), LocationListener,Interface.Presenter {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
+        Log.e("onStartCommand","1")
         //Проверяем получили действие с отменой данного сервиса
         if(ACTION_STOP_SERVICE == intent!!.action){
             val notificationManager =
@@ -226,9 +227,14 @@ class LocationService:Service(), LocationListener,Interface.Presenter {
 
 
     override fun callbackSuccess(attraction: BackgroundNearbyAttraction.NearbyAttraction) {
+        val intentShower = Intent(context,MainActivity::class.java)
+        intentShower.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        intentShower.putExtra("id",attraction.id)
+        val pendingIntent = PendingIntent.getActivity(context,0,intentShower,0)
         val notification:Notification = NotificationCompat.Builder(applicationContext,CHANNEL_ID)
             .setContentTitle(attraction.title)
-            .setContentText("Расстояние до ближайшего: ${attraction.distance}")
+            .setContentText("Расстояние: ${attraction.distance}")
+            .setContentIntent(pendingIntent)
             .setSmallIcon(R.drawable.map_icon_museum)
             .build()
 

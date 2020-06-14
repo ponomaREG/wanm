@@ -2,6 +2,8 @@ package com.attractions.wanm.fragments.map
 
 
 import android.Manifest
+import android.app.ActivityManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -43,6 +45,7 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
     companion object{
         private var instance: MapView? = null
         private var customLatLng:LatLng? = null
+        private var customId:Int? = null
 
         fun getInstance(): MapView {
             if(instance == null){
@@ -57,7 +60,18 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
                 instance =
                     MapView()
             }
+            customId = null
             customLatLng = LatLng(latitude,longitude)
+            return instance as MapView
+        }
+
+        fun getInstance(id:Int):MapView{
+            if(instance == null){
+                instance =
+                    MapView()
+            }
+            customId = id
+            customLatLng = null
             return instance as MapView
         }
     }
@@ -87,8 +101,10 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
         mMap = googleMap
         setMarksOnMap()
         updateLocation()
-        val intent = Intent(context,LocationService::class.java)
-        context!!.startService(intent)
+        if(!isServiceAlreadyRunning()) {
+            val intent = Intent(context, LocationService::class.java)
+            context!!.startService(intent)
+        }
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
@@ -128,7 +144,7 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
                 }
             }
         } catch (e: SecurityException) {
-            Log.e("Exception: %s", e.message)
+            Log.e("Exception: %s", e.message.toString())
         }
         return latLng
     }
@@ -181,7 +197,6 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
 
 
 
-
     private fun initOclToInfoWindow(){
         mMap.setOnInfoWindowClickListener {
             val id:Int = it.tag as Int
@@ -225,8 +240,25 @@ class MapView : Fragment(), OnMapReadyCallback, Interface.View {
                 && customLatLng!!.longitude == longitude
             ) newMarker.showInfoWindow()
         }
+        if(customId == id){
+            moveOnLatLng(latIng)
+            newMarker.showInfoWindow()
+        }
         newMarker.tag = id
         initOclToInfoWindow()
+    }
+
+
+    private fun isServiceAlreadyRunning(): Boolean {
+        val activityManager:ActivityManager = context!!.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        Log.d("count",activityManager.getRunningServices(Integer.MAX_VALUE).size.toString())
+        for (service in activityManager.getRunningServices(Integer.MAX_VALUE)){
+            if(service.service.className == LocationService::class.java.name){
+                return true
+            }
+        }
+        return false
+
     }
 
 

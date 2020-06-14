@@ -15,10 +15,10 @@ class LocationServiceModel(private val presenter:Interface.Presenter):Interface.
             .subscribeOn(Schedulers.io())
             .subscribe({
                 if(it.status == 0){
-
+                    this.presenter.callbackSuccess(it.nearAttraction)
                 }
             },{
-
+                this.presenter.callbackError(it)
             })
     }
 
