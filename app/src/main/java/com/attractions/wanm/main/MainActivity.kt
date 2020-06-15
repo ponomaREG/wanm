@@ -20,6 +20,7 @@ class MainActivity : AppCompatActivity(),CommunicationBetweenListAndMap {
         Log.d("ON CREATE","!")
         setContentView(R.layout.activity_main)
         setOclsToMenuItems()
+        prepareActionBar()
         init()
     }
 
@@ -27,6 +28,11 @@ class MainActivity : AppCompatActivity(),CommunicationBetweenListAndMap {
         if(!getIncomeIntentIfExists()){
             initStartFragment()
         }
+    }
+
+    private fun prepareActionBar(){
+        val actionBar = supportActionBar
+        actionBar!!.setDisplayShowTitleEnabled(false)
     }
 
     private fun getIncomeIntentIfExists():Boolean{

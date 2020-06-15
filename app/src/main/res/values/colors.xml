@@ -8,7 +8,7 @@
 
 
     <color name="bnvBackgroundColor">#3700B3</color>
-    <color name="bnvTextColor">#000000</color>
-    <color name="bnvIconColor">#000000</color>
+    <color name="bnvTextColor">#FFFFFF</color>
+    <color name="bnvIconColor">#FFFFFF</color>
 
 </resources>
