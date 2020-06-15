@@ -20,10 +20,16 @@ class MainActivity : AppCompatActivity(),CommunicationBetweenListAndMap {
         Log.d("ON CREATE","!")
         setContentView(R.layout.activity_main)
         setOclsToMenuItems()
-        getIncomeIntentIfExists()
+        init()
     }
 
-    private fun getIncomeIntentIfExists(){
+    private fun init(){
+        if(!getIncomeIntentIfExists()){
+            initStartFragment()
+        }
+    }
+
+    private fun getIncomeIntentIfExists():Boolean{
         val bundle = intent.extras
         if(bundle != null){
             val id_attr = bundle.getInt("id",-1)
@@ -31,8 +37,15 @@ class MainActivity : AppCompatActivity(),CommunicationBetweenListAndMap {
                 val fragment = MapView.getInstance(id_attr)
                 removeAllFragments()
                 insertFragment(fragment)
+                return true
             }
         }
+        return false
+    }
+
+    private fun initStartFragment(){
+        val fragment = ListAttView.getInstance()
+        insertFragment(fragment)
     }
 
 //    override fun onCreateOptionsMenu(menu: Menu?): Boolean {

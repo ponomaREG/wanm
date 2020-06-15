@@ -165,8 +165,8 @@ class LocationService:Service(), LocationListener,Interface.Presenter {
                 @SuppressLint("RestrictedApi")
                 override fun onConnected(p0: Bundle?) {
                     mLocationRequest = LocationRequest() //Запрос на получение локации
-                    mLocationRequest!!.interval = 10 * 1000.toLong()
-                    mLocationRequest!!.fastestInterval = 5 * 1000.toLong()
+                    mLocationRequest!!.interval = 30 * 1000.toLong()
+                    mLocationRequest!!.fastestInterval = 20 * 1000.toLong()
                     mLocationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
                     val builder = LocationSettingsRequest.Builder()
                     builder.addLocationRequest(mLocationRequest!!)//Настройки
